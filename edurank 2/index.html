@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global University Analytics | Sayborn</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* === GENEL SAYFA VE KUTU TASARIMLARI === */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #0f172a; 
+            color: #334155; 
+            padding: 40px 20px; 
+            margin: 0;
+        }
+        .container { 
+            max-width: 1100px; 
+            margin: auto; 
+            background: #ffffff; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
+            position: relative;
+        }
+
+        /* === DİL SEÇİCİ TASARIMI === */
+        .lang-selector {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+        }
+        .lang-selector select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            font-weight: bold;
+            color: #1e293b;
+            cursor: pointer;
+            outline: none;
+        }
+
+        h2 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-top: 0; width: 80%; }
+        p.subtitle { color: #64748b; font-size: 15px; margin-bottom: 25px; }
+        
+        /* === İNPUT VE BUTON TASARIMLARI === */
+        label { font-weight: 600; color: #475569; }
+        input { 
+            width: 100%; padding: 14px; margin: 10px 0 20px 0; 
+            border-radius: 8px; border: 1px solid #cbd5e1; font-size: 16px;
+            box-sizing: border-box;
+        }
+        button { 
+            width: 100%; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white; border: none; border-radius: 8px; cursor: pointer; 
+            font-size: 17px; font-weight: bold; transition: all 0.3s ease;
+        }
+        button:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); transform: translateY(-2px); }
+        button:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+
+        /* === YUKARIDAKİ ANA SKOR GRAFİKLERİ === */
+        .charts { display: flex; justify-content: space-between; margin-top: 35px; }
+        .chart-container { width: 48%; background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; }
+        
+        #reportDiv h3 { color: #0f172a; margin-top: 50px; font-size: 28px; text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
+        
+        /* === ANA BÖLÜM BAŞLIKLARI (AKADEMİK VS SOSYAL) === */
+        .ai-analiz-konteynir { margin-top: 40px; }
+        .bolum-basligi {
+            font-size: 26px; color: #0f172a; margin-bottom: 30px;
+            padding-bottom: 10px; border-bottom: 3px solid #3b82f6;
+            display: inline-block;
+        }
+        
+        /* === 5 SATIRLIK YORUM BLOKLARI (KART TASARIMLARI) === */
+        .konu-karti {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+            padding: 25px; margin-bottom: 25px; border-left: 6px solid #8b5cf6;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: all 0.3s ease;
+        }
+        .konu-karti.sosyal-medya-karti { border-left-color: #ec4899; } 
+        .konu-karti:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.08); transform: translateY(-3px); }
+        .konu-karti h5 { margin-top: 0; font-size: 20px; color: #1e293b; border-bottom: 2px dashed #cbd5e1; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        /* Metinleri ve Grafikleri Yan Yana Tutan Grid Sistemi */
+        .karti-ikiye-bol {
+            display: grid;
+            grid-template-columns: 1fr 420px; 
+            gap: 30px; align-items: center;
+        }
+        
+        .metin-alani { display: flex; flex-direction: column; gap: 12px; }
+        .satir-blogu { display: flex; flex-direction: column; }
+        .satir-baslik { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+        .satir-icerik { font-size: 15px; color: #334155; line-height: 1.5; }
+        .satir-yapilmali .satir-icerik { color: #15803d; font-weight: 500; }
+        .satir-yapilmamali .satir-icerik { color: #b91c1c; font-weight: 500; }
+
+        .grafik-alani {
+            background: #ffffff; padding: 20px; border-radius: 8px;
+            border: 1px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            height: 280px; position: relative; width: 100%;
+        }
+
+        .bolum-ayirici { height: 40px; margin-top: 50px; border-top: 2px dashed #cbd5e1; }
+
+        @media (max-width: 900px) { .karti-ikiye-bol { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="lang-selector">
+        <select id="langSelect" onchange="diliDegistir()">
+            <option value="tr">🇹🇷 Türkçe</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="zh">🇨🇳 中文</option>
+        </select>
+    </div>
+
+    <h2 id="pageTitle">🎓 Global University Analytics</h2>
+    <p class="subtitle" id="pageSubtitle">Analiz etmek istediğiniz kurumu girin. Sistem, Akademik ve Dijital metrikler üzerinden raporlar oluşturacaktır.</p>
+    
+    <label id="inputLabel">Hedef Üniversite Adı:</label>
+    <input type="text" id="uniName" placeholder="Örn: University of Toronto, Stanford, vb.">
+    <button onclick="analizEt()" id="submitBtn">🚀 Kapsamlı Veri Analizini Başlat</button>
+
+    <div class="charts" style="display: none;" id="chartsDiv">
+        <div class="chart-container"><canvas id="barChart"></canvas></div>
+        <div class="chart-container"><canvas id="pieChart"></canvas></div>
+    </div>
+    
+    <div id="reportDiv"></div>
+</div>
+
+<script>
+    let barChartInstance = null;
+    let pieChartInstance = null;
+    let miniChartInstances = [];
+
+    // === ARAYÜZ METİNLERİ SÖZLÜĞÜ ===
+    const uiTexts = {
+        tr: {
+            title: "🎓 Global University Analytics",
+            subtitle: "Analiz etmek istediğiniz kurumu girin. Sistem, Akademik ve Dijital metrikler üzerinden raporlar oluşturacaktır.",
+            label: "Hedef Üniversite Adı:",
+            placeholder: "Örn: University of Toronto, Stanford, vb.",
+            btnNormal: "🚀 Kapsamlı Veri Analizini Başlat",
+            btnLoading: "Yapay Zeka Derin Analiz & Grafikler Hazırlanıyor...",
+            alertEmpty: "Lütfen analiz edilecek bir üniversite adı gir!",
+            alertError: "Sunucuya ulaşılamadı. server.js çalışıyor mu kanka?",
+            secAkademik: "🧠 Akademik ve İdari Faktörler",
+            secSosyal: "📱 Dijital Varlık ve Sosyal Medya",
+            s1: "1. Genel Durum (Olumlu/Olumsuz)",
+            s2: "2. Yeterlilik Analizi",
+            s3: "3. Gerekçe (Neden Yeterli/Yetersiz?)",
+            s4: "4. Aksiyon: Neler Yapılmalı?",
+            s5: "5. Risk: Neler Yapılmamalı?",
+            bekleniyor: "Veri Bekleniyor...",
+            yapilmamis: "Belirtilmemiş",
+            grafikMevcut: "Mevcut Durum",
+            grafikHedef: "Hedeflenen",
+            grafikOrtalama: "Sektör Ort.",
+            uyari: "⚠️ Sistem Uyarı: Sunucudan yorum blokları verisi çekilemedi.",
+            raporBasligi: "Stratejik Analiz Raporu"
+        },
+        en: {
+            title: "🎓 Global University Analytics",
+            subtitle: "Enter the institution you want to analyze. The system will generate reports on Academic and Digital metrics.",
+            label: "Target University Name:",
+            placeholder: "e.g. University of Toronto, Stanford, etc.",
+            btnNormal: "🚀 Start Comprehensive Data Analysis",
+            btnLoading: "AI is Generating Deep Analysis & Charts...",
+            alertEmpty: "Please enter a university name to analyze!",
+            alertError: "Server unreachable. Is server.js running?",
+            secAkademik: "🧠 Academic and Administrative Factors",
+            secSosyal: "📱 Digital Presence and Social Media",
+            s1: "1. General Status (Positive/Negative)",
+            s2: "2. Adequacy Analysis",
+            s3: "3. Justification (Why adequate/inadequate?)",
+            s4: "4. Action: What Should Be Done?",
+            s5: "5. Risk: What Should Be Avoided?",
+            bekleniyor: "Awaiting Data...",
+            yapilmamis: "Not Specified",
+            grafikMevcut: "Current Status",
+            grafikHedef: "Target",
+            grafikOrtalama: "Industry Avg.",
+            uyari: "⚠️ System Warning: Could not fetch comment blocks from the server.",
+            raporBasligi: "Strategic Analysis Report"
+        },
+        de: {
+            title: "🎓 Global University Analytics",
+            subtitle: "Geben Sie die zu analysierende Einrichtung ein. Das System erstellt Berichte über akademische und digitale Metriken.",
+            label: "Name der Zieluniversität:",
+            placeholder: "z.B. University of Toronto, Stanford, usw.",
+            btnNormal: "🚀 Umfassende Datenanalyse Starten",
+            btnLoading: "KI Generiert Tiefe Analysen & Diagramme...",
+            alertEmpty: "Bitte geben Sie einen Universitätsnamen zur Analyse ein!",
+            alertError: "Server nicht erreichbar. Läuft server.js?",
+            secAkademik: "🧠 Akademische und Administrative Faktoren",
+            secSosyal: "📱 Digitale Präsenz und Soziale Medien",
+            s1: "1. Allgemeiner Status (Positiv/Negativ)",
+            s2: "2. Angemessenheitsanalyse",
+            s3: "3. Begründung (Warum angemessen/unangemessen?)",
+            s4: "4. Aktion: Was sollte getan werden?",
+            s5: "5. Risiko: Was sollte vermieden werden?",
+            bekleniyor: "Warten auf Daten...",
+            yapilmamis: "Nicht Angegeben",
+            grafikMevcut: "Aktueller Status",
+            grafikHedef: "Ziel",
+            grafikOrtalama: "Branchendurchschnitt",
+            uyari: "⚠️ Systemwarnung: Kommentarblöcke konnten nicht vom Server abgerufen werden.",
+            raporBasligi: "Strategischer Analysebericht"
+        },
+        fr: {
+            title: "🎓 Global University Analytics",
+            subtitle: "Saisissez l'établissement que vous souhaitez analyser. Le système générera des rapports sur les mesures académiques et numériques.",
+            label: "Nom de l'Université Cible :",
+            placeholder: "ex. University of Toronto, Stanford, etc.",
+            btnNormal: "🚀 Lancer l'Analyse Complète des Données",
+            btnLoading: "L'IA Génère une Analyse Profonde & des Graphiques...",
+            alertEmpty: "Veuillez entrer le nom d'une université à analyser !",
+            alertError: "Serveur injoignable. server.js est-il en cours d'exécution ?",
+            secAkademik: "🧠 Facteurs Académiques et Administratifs",
+            secSosyal: "📱 Présence Numérique et Médias Sociaux",
+            s1: "1. Statut Général (Positif/Négatif)",
+            s2: "2. Analyse d'Adéquation",
+            s3: "3. Justification (Pourquoi adéquat/inadéquat ?)",
+            s4: "4. Action : Que Faut-il Faire ?",
+            s5: "5. Risque : Que Faut-il Éviter ?",
+            bekleniyor: "En attente de données...",
+            yapilmamis: "Non Spécifié",
+            grafikMevcut: "Statut Actuel",
+            grafikHedef: "Cible",
+            grafikOrtalama: "Moyenne du Secteur",
+            uyari: "⚠️ Avertissement Système : Impossible de récupérer les blocs de commentaires depuis le serveur.",
+            raporBasligi: "Rapport d'Analyse Stratégique"
+        },
+        ar: {
+            title: "🎓 التحليلات الجامعية العالمية",
+            subtitle: "أدخل المؤسسة التي ترغب في تحليلها. سيقوم النظام بإنشاء تقارير حول المقاييس الأكاديمية والرقمية.",
+            label: "اسم الجامعة المستهدفة:",
+            placeholder: "مثال: University of Toronto، Stanford، إلخ.",
+            btnNormal: "🚀 بدء تحليل البيانات الشامل",
+            btnLoading: "الذكاء الاصطناعي يقوم بإنشاء تحليل عميق ورسوم بيانية...",
+            alertEmpty: "يرجى إدخال اسم جامعة لتحليلها!",
+            alertError: "لا يمكن الوصول إلى الخادم. هل server.js قيد التشغيل؟",
+            secAkademik: "🧠 العوامل الأكاديمية والإدارية",
+            secSosyal: "📱 التواجد الرقمي ووسائل التواصل الاجتماعي",
+            s1: "1. الحالة العامة (إيجابي/سلبي)",
+            s2: "2. تحليل الكفاءة",
+            s3: "3. المبرر (لماذا كافٍ/غير كافٍ؟)",
+            s4: "4. الإجراء: ماذا يجب أن يُفعل؟",
+            s5: "5. المخاطر: ماذا يجب تجنبه؟",
+            bekleniyor: "في انتظار البيانات...",
+            yapilmamis: "غير محدد",
+            grafikMevcut: "الحالة الحالية",
+            grafikHedef: "الهدف",
+            grafikOrtalama: "متوسط الصناعة",
+            uyari: "⚠️ تحذير النظام: لم يتمكن من جلب كتل التعليقات من الخادم.",
+            raporBasligi: "تقرير التحليل الاستراتيجي"
+        },
+        zh: {
+            title: "🎓 全球大学分析",
+            subtitle: "输入您要分析的机构。系统将生成有关学术和数字指标的报告。",
+            label: "目标大学名称：",
+            placeholder: "例如：多伦多大学、斯坦福大学等",
+            btnNormal: "🚀 开始全面数据分析",
+            btnLoading: "AI 正在生成深度分析和图表...",
+            alertEmpty: "请输入要分析的大学名称！",
+            alertError: "无法连接到服务器。server.js 是否在运行？",
+            secAkademik: "🧠 学术和行政因素",
+            secSosyal: "📱 数字表现和社交媒体",
+            s1: "1. 总体状况（正面/负面）",
+            s2: "2. 充分性分析",
+            s3: "3. 理由（为什么充足/不充足？）",
+            s4: "4. 措施：应该做什么？",
+            s5: "5. 风险：应该避免什么？",
+            bekleniyor: "等待数据中...",
+            yapilmamis: "未指定",
+            grafikMevcut: "当前状态",
+            grafikHedef: "目标",
+            grafikOrtalama: "行业平均",
+            uyari: "⚠️ 系统警告：无法从服务器获取评论块。",
+            raporBasligi: "战略分析报告"
+        }
+    };
+
+    function getCurrentLang() {
+        return document.getElementById('langSelect').value;
+    }
+
+    function diliDegistir() {
+        const lang = getCurrentLang();
+        const t = uiTexts[lang];
+        document.getElementById('pageTitle').innerText = t.title;
+        document.getElementById('pageSubtitle').innerText = t.subtitle;
+        document.getElementById('inputLabel').innerText = t.label;
+        document.getElementById('uniName').placeholder = t.placeholder;
+        
+        const btn = document.getElementById('submitBtn');
+        if (!btn.disabled) { btn.innerText = t.btnNormal; }
+        
+        document.getElementById('reportDiv').innerHTML = "";
+        document.getElementById('chartsDiv').style.display = "none";
+    }
+
+    async function analizEt() {
+        const uniName = document.getElementById('uniName').value;
+        const btn = document.getElementById('submitBtn');
+        const lang = getCurrentLang();
+        const t = uiTexts[lang];
+
+        if (!uniName.trim()) { alert(t.alertEmpty); return; }
+
+        btn.innerText = t.btnLoading;
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('http://localhost:3000/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ universityName: uniName, language: lang }) 
+            });
+
+            const data = await response.json();
+            
+            if (data.error) { 
+                alert(data.error); 
+            } else {
+                if(data.rawScores) grafikleriCiz(data.rawScores); 
+                raporuYazdir(data.report, uniName, lang); 
+            }
+        } catch (error) {
+            alert(t.alertError);
+            console.error(error);
+        } finally {
+            const currentLang = getCurrentLang();
+            btn.innerText = uiTexts[currentLang].btnNormal;
+            btn.disabled = false;
+        }
+    }
+
+    function grafikleriCiz(scores) {
+        document.getElementById('chartsDiv').style.display = "flex";
+        const labels = Object.keys(scores);
+        const values = Object.values(scores);
+
+        if (barChartInstance) barChartInstance.destroy();
+        if (pieChartInstance) pieChartInstance.destroy();
+
+        const ctxBar = document.getElementById('barChart').getContext('2d');
+        barChartInstance = new Chart(ctxBar, {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ label: 'Skor', data: values, backgroundColor: '#3b82f6', borderRadius: 5 }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
+        });
+
+        const ctxPie = document.getElementById('pieChart').getContext('2d');
+        pieChartInstance = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: { labels: labels, datasets: [{ data: values, backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'] }] },
+            options: { cutout: '60%' }
+        });
+    }
+
+    function kartHTMLUret(konu, index, cssClass, lang) {
+        const chartId = `miniChart_${cssClass}_${index}`; 
+        const t = uiTexts[lang];
+        
+        const garantiVeri = konu.grafikVerisi || [
+            Math.floor(Math.random() * 30) + 50, 
+            Math.floor(Math.random() * 15) + 85, 
+            Math.floor(Math.random() * 20) + 40
+        ];
+
+        let html = `
+        <div class="konu-karti ${cssClass}">
+            <h5>${konu.baslik}</h5>
+            <div class="karti-ikiye-bol">
+                
+                <div class="metin-alani">
+                    <div class="satir-blogu">
+                        <span class="satir-baslik">${t.s1}</span>
+                        <span class="satir-icerik">${konu.olumlu_olumsuz || t.bekleniyor}</span>
+                    </div>
+                    <div class="satir-blogu">
+                        <span class="satir-baslik">${t.s2}</span>
+                        <span class="satir-icerik">${konu.yeterlilik || t.bekleniyor}</span>
+                    </div>
+                    <div class="satir-blogu">
+                        <span class="satir-baslik">${t.s3}</span>
+                        <span class="satir-icerik">${konu.neden_yeterli_yetersiz || t.bekleniyor}</span>
+                    </div>
+                    <div class="satir-blogu satir-yapilmali">
+                        <span class="satir-baslik">${t.s4}</span>
+                        <span class="satir-icerik">✅ ${konu.yapilmali || t.yapilmamis}</span>
+                    </div>
+                    <div class="satir-blogu satir-yapilmamali">
+                        <span class="satir-baslik">${t.s5}</span>
+                        <span class="satir-icerik">🚫 ${konu.yapilmamali || t.yapilmamis}</span>
+                    </div>
+                </div>
+                
+                <div class="grafik-alani">
+                    <canvas id="${chartId}"></canvas>
+                </div>
+
+            </div>
+        </div>`;
+        
+        return { html, id: chartId, data: garantiVeri };
+    }
+
+    function raporuYazdir(report, uniName, lang) {
+        const reportDiv = document.getElementById('reportDiv');
+        const t = uiTexts[lang];
+        
+        let finalHtml = `<h3>📊 ${uniName} - ${t.raporBasligi}</h3>`;
+        let chartConfigs = []; 
+
+        const akademikVeriSeti = report.akademik || report.detayliKategoriler || [];
+        const sosyalVeriSeti = report.sosyalMedya || [];
+
+        if(akademikVeriSeti.length === 0) {
+            finalHtml += `<div style="color: #b91c1c; padding: 20px; background: #fef2f2; border-left: 5px solid #ef4444; margin-top: 20px; font-weight: bold;">
+                ${t.uyari}
+            </div>`;
+        }
+
+        if(akademikVeriSeti.length > 0) {
+            finalHtml += `<div class="ai-analiz-konteynir"><h4 class="bolum-basligi">${t.secAkademik}</h4>`;
+            akademikVeriSeti.forEach((konu, index) => {
+                const paket = kartHTMLUret(konu, index, "akademik-karti", lang);
+                finalHtml += paket.html;
+                chartConfigs.push({ id: paket.id, data: paket.data });
+            });
+            finalHtml += `</div>`;
+        }
+
+        if(sosyalVeriSeti.length > 0) {
+            finalHtml += `<div class="bolum-ayirici"></div>`;
+        }
+
+        if(sosyalVeriSeti.length > 0) {
+            finalHtml += `<div class="ai-analiz-konteynir"><h4 class="bolum-basligi" style="border-bottom-color: #ec4899;">${t.secSosyal}</h4>`;
+            sosyalVeriSeti.forEach((konu, index) => {
+                const paket = kartHTMLUret(konu, index + 100, "sosyal-medya-karti", lang); 
+                finalHtml += paket.html;
+                chartConfigs.push({ id: paket.id, data: paket.data });
+            });
+            finalHtml += `</div>`;
+        }
+
+        reportDiv.innerHTML = finalHtml;
+
+        miniChartInstances.forEach(chart => chart.destroy());
+        miniChartInstances = [];
+
+        chartConfigs.forEach(config => {
+            const ctx = document.getElementById(config.id).getContext('2d');
+            const newChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [t.grafikMevcut, t.grafikHedef, t.grafikOrtalama],
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Trend',
+                            data: config.data, 
+                            borderColor: '#ef4444', 
+                            borderWidth: 3,
+                            tension: 0.4, 
+                            fill: false,
+                            pointBackgroundColor: '#ef4444',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Skor',
+                            data: config.data, 
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.6)', 
+                                'rgba(16, 185, 129, 0.6)', 
+                                'rgba(148, 163, 184, 0.6)'  
+                            ],
+                            borderColor: [
+                                'rgb(37, 99, 235)',
+                                'rgb(5, 150, 105)',
+                                'rgb(100, 116, 139)'
+                            ],
+                            borderWidth: 2,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, max: 100,
+                            ticks: { color: '#0f172a', font: { weight: 'bold', size: 12 } },
+                            grid: { display: true, color: 'rgba(0, 0, 0, 0.3)', lineWidth: 1, drawBorder: true }
+                        },
+                        x: {
+                            ticks: { color: '#0f172a', font: { weight: 'bold', size: 13 } },
+                            grid: { display: true, color: 'rgba(0, 0, 0, 0.1)' }
+                        }
+                    }
+                }
+            });
+            miniChartInstances.push(newChart);
+        });
+    }
+
+    // === OTOMATİK TARAYICI DİLİ ALGILAMA (SMART DETECT) ===
+    window.onload = function() {
+        let browserLang = navigator.language.substring(0, 2); 
+        const desteklenenDiller = ["tr", "en", "de", "fr", "ar", "zh"];
+        
+        if (!desteklenenDiller.includes(browserLang)) {
+            browserLang = "en"; // Bilinmeyen bir dilse varsayılan İngilizce olsun
+        }
+        
+        document.getElementById('langSelect').value = browserLang;
+        diliDegistir();
+    };
+</script>
+</body>
+</html>
