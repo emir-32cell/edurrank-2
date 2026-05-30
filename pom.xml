@@ -1,0 +1,98 @@
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class UniversityDataIntegration {
+    
+    // Tarayıcı taklidi yapmak için User-Agent
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
+
+    /**
+     * American Caldwell GUV verilerini çeker.
+     * Sıralama Metrikleri: News Mentions (NM) + Public Interest (PI) + Social Media (SM) + Website Visitors (WV)
+     */
+    public List<Map<String, String>> fetchCaldwellGuvRankings() {
+        List<Map<String, String>> rankings = new ArrayList<>();
+        String url = "https://americancaldwell.com/guv-rankings";
+        
+        try {
+            Document doc = Jsoup.connect(url)
+                                .userAgent(USER_AGENT)
+                                .get();
+            
+            // TODO: Sitenin güncel DOM yapısına göre listeyi dolduracak döngü eklenecek
+            // Elements rows = doc.select("div.ranking-row");
+            // for (Element row : rows) { ... }
+            
+        } catch (IOException e) {
+            System.err.println("Caldwell verileri çekilirken hata oluştu: " + e.getMessage());
+        }
+        
+        return rankings;
+    }
+
+    /**
+     * NCES IPEDS veritabanı.
+     * Geçici 'sid' yerine ASP.NET Viewstate yönetimiyle dinamik POST atar.
+     */
+    public List<Map<String, String>> fetchIpedsData(String institutionName) {
+        List<Map<String, String>> ipedsData = new ArrayList<>();
+        String baseUrl = "https://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx";
+        
+        try {
+            // 1. Ana sayfadan Session başlat ve Viewstate'i al
+            Connection.Response initialResponse = Jsoup.connect(baseUrl)
+                                                       .userAgent(USER_AGENT)
+                                                       .method(Connection.Method.GET)
+                                                       .execute();
+            
+            Document initialDoc = initialResponse.parse();
+            Element viewStateElem = initialDoc.selectFirst("input[name=__VIEWSTATE]");
+            String viewState = (viewStateElem != null) ? viewStateElem.attr("value") : "";
+            
+            // 2. Spesifik üniversite için formu simüle edip POST at (Session ID zaman aşımını atlatmak için)
+            /*
+            Document dataDoc = Jsoup.connect(baseUrl)
+                                    .userAgent(USER_AGENT)
+                                    .cookies(initialResponse.cookies()) // Oturumu koru
+                                    .data("__VIEWSTATE", viewState)
+                                    .data("ctl00$contentPlaceHolder$txtInstitutionName", institutionName)
+                                    // Gerekli diğer form parametreleri buraya eklenecek
+                                    .post();
+            */
+            
+        } catch (IOException e) {
+            System.err.println("IPEDS verileri çekilirken hata oluştu: " + e.getMessage());
+        }
+        
+        return ipedsData;
+    }
+
+    /**
+     * Knowledge E araştırma ve akademik çözümler entegrasyonu.
+     */
+    public List<Map<String, String>> fetchKnowledgeEInsights() {
+        List<Map<String, String>> insights = new ArrayList<>();
+        String url = "https://knowledgee.com/";
+        
+        try {
+            Document doc = Jsoup.connect(url)
+                                .userAgent(USER_AGENT)
+                                .get();
+            
+            // Spesifik olarak hangi veri çekilecekse burası ona göre şekillenecek
+            
+        } catch (IOException e) {
+            System.err.println("Knowledge E verileri çekilirken hata oluştu: " + e.getMessage());
+        }
+        
+        return insights;
+    }
+}

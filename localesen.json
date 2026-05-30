@@ -1,0 +1,31 @@
+{
+  "ozet": "AI Strategy and Reputation Report",
+  "akademik": [
+    {
+      "baslik": "1. Academic Personnel Capacity",
+      "olumlu_olumsuz": "Staff quantity is positive, international diversity is negative.",
+      "yeterlilik": "Numerically sufficient but open to improvement in qualitative distribution.",
+      "neden_yeterli_yetersiz": "Student-to-faculty ratio is ideal. However, foreign academician rate is below 5%.",
+      "yapilmali": "Attractive employment packages should be created for academics with overseas PhDs.",
+      "yapilmamali": "Avoid the mistake of academic inbreeding."
+    },
+    {
+      "baslik": "2. Research and Innovation (R&D)",
+      "olumlu_olumsuz": "Number of articles is positive, patent applications and industry integration are negative.",
+      "yeterlilik": "Sufficient in theoretical production, inadequate in commercializing innovation.",
+      "neden_yeterli_yetersiz": "Scientific publications are above average. Conversion to industry application is low.",
+      "yapilmali": "Technoparks and incubators must integrate with global industry giants.",
+      "yapilmamali": "Do not force academics into low-impact publications just to increase numbers."
+    }
+  ],
+  "sosyal": [
+    {
+      "baslik": "💼 LinkedIn Corporate Network",
+      "olumlu_olumsuz": "Alumni profiles are strong, corporate partnership posts are negative.",
+      "yeterlilik": "Adequate for professional image, needs improvement in attracting industrial funds.",
+      "neden_yeterli_yetersiz": "Alumni network is vast. However, marketing technopark projects globally is lacking.",
+      "yapilmali": "Patented projects and university-industry successes should be highlighted as articles.",
+      "yapilmamali": "Do not trivialize the platform by only sharing graduation ceremony photos."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "ozet": "Yapay Zeka Strateji ve İtibar Raporu",
+  "akademik": [
+    {
+      "baslik": "1. Akademik Kadro",
+      "olumlu_olumsuz": "Kadro niceliği olumlu, uluslararası çeşitlilik olumsuz.",
+      "yeterlilik": "Sayısal olarak yeterli ancak niteliksel dağılımda gelişime açık.",
+      "neden_yeterli_yetersiz": "Öğrenci başına düşen hoca sayısı ideal düzeyde. Ancak yabancı akademisyen oranı %5'in altında.",
+      "yapilmali": "Yurtdışı doktoralı akademisyenler için cazip istihdam paketleri oluşturulmalı.",
+      "yapilmamali": "Sadece kurumun kendi mezunlarını kadroya alma hatasına düşülmemeli."
+    },
+    {
+      "baslik": "2. Ar-Ge ve İnovasyon",
+      "olumlu_olumsuz": "Makale sayısı olumlu, patent başvuruları ve sanayi entegrasyonu olumsuz.",
+      "yeterlilik": "Teorik üretimde yeterli, inovasyonun ticarileşmesinde yetersiz.",
+      "neden_yeterli_yetersiz": "Bilimsel yayın sayısı küresel ortalamanın üstünde. Çıkan yayınların sanayiye dönüşüm oranı düşük.",
+      "yapilmali": "Teknokent ve kuluçka merkezleri global sanayi devleriyle entegre çalışmalı.",
+      "yapilmamali": "Sadece sayıyı artırmaya yönelik etki değeri düşük yayınlara zorlanmamalı."
+    }
+  ],
+  "sosyal": [
+    {
+      "baslik": "💼 LinkedIn Kurumsal Ağ Yönetimi",
+      "olumlu_olumsuz": "Mezun ve akademisyen profilleri güçlü, kurumsal şirket ortaklık paylaşımları olumsuz.",
+      "yeterlilik": "Profesyonel imaj için yeterli, endüstriyel fon ve sponsorluk çekmede gelişime açık.",
+      "neden_yeterli_yetersiz": "Okulun mezun ağı geniş. Ancak teknokent projelerinin global devlere pazarlanması eksik.",
+      "yapilmali": "Akademisyenlerin patentli projeleri ve başarıları makale formatında öne çıkarılmalı.",
+      "yapilmamali": "Sadece mezuniyet töreni fotoğrafları paylaşarak profesyonel platform sıradanlaştırılmamalı."
+    }
+  ]
+}
